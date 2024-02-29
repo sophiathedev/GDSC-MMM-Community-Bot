@@ -1,4 +1,6 @@
-![GDSC PTIT](https://github.com/iwannabethesophia/GDSC-MMM-Community-Bot/blob/master/img/gdsclogo.png?raw=true)
+<p align="center">
+  <img src="https://github.com/iwannabethesophia/GDSC-MMM-Community-Bot/blob/master/img/gdsclogo.png?raw=true" />
+</p>
 
 ## GDSC MMM Community Bot: Discord Bot xác minh danh tính cho cộng đồng học tập "Muốn Mở Mang".
 
