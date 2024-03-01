@@ -108,9 +108,11 @@ class Verify( commands.Cog ):
                 await countMessage.delete()
                 await member.send(f"**Xác minh danh tính thất bại**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
             else:
+                # welcome channel
+                welcomeChannel: discord.TextChannel = self.bot.get_guild(1211629767384895488).get_channel(1211630156603457547)
                 # when verified complete
                 await countMessage.delete()
-                await member.send("**Xác minh danh tính thành công !**, Một lần nữa chào mừng bạn đến với cộng đồng \"Muốn Mở Mang\" của GDSC PTIT :partying_face:")
+                await member.send(f"**Xác minh danh tính thành công !**, Một lần nữa chào mừng bạn đến với cộng đồng \"Muốn Mở Mang\" của GDSC PTIT :partying_face:\n\nHãy cùng bắt đầu với {welcomeChannel.mention}")
 
                 # adding role to user
                 serverGuild: discord.Guild = self.bot.get_guild(1211629767384895488) # get GDSC Community Server guild
