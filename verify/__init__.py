@@ -59,9 +59,9 @@ class Verify( commands.Cog ):
         verifyChannel: discord.TextChannel = self.bot.get_guild(1211629767384895488).get_channel(1212631142017142814)
         await verifyChannel.send("**Dành cho những bạn chưa xác minh danh tính**\n\nCó một số bạn quên chưa điền mail trong quá trình xác nhận hoặc nhập mã OTP sai quá nhiều lần hoặc không nhận được mã OTP trong quá trình xác minh.\n\nCác bạn có thể tiến hành xác minh danh tính bằng cách ấn vào nút dưới đây !", view=GlobalVerifyMsgView(verifyCallback=self.verifyUser))
 
-    @commands.Cog.listener()
-    async def on_member_join( self, member: discord.Member ) -> None:
-        await self.verifyUser(member)
+    #@commands.Cog.listener()
+    #async def on_member_join( self, member: discord.Member ) -> None:
+    #    await self.verifyUser(member)
 
     async def verifyUser(self, member: discord.Member) -> None:
         await member.send("**CHÀO MỪNG BẠN ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC PTIT**\n\nBut, One more thing...\n\nBạn vui lòng gửi email của bạn để xác minh danh tính (<name>@stu.ptit.edu.vn | @gmail.com | @gdscptit.dev). **Lưu ý: admin sẽ nhìn thấy mail mà bạn sử dụng để xác minh danh tính.**")
