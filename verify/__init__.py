@@ -61,7 +61,7 @@ class Verify( commands.Cog ):
 
     @commands.Cog.listener()
     async def on_member_join( self, member: discord.Member ) -> None:
-        self.verifyUser(member)
+        await self.verifyUser(member)
 
     async def verifyUser(self, member: discord.Member) -> None:
         await member.send("**CHÀO MỪNG BẠN ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC PTIT**\n\nBut, One more thing...\n\nBạn vui lòng gửi email của bạn để xác minh danh tính (<name>@stu.ptit.edu.vn | @gmail.com | @gdscptit.dev). **Lưu ý: admin sẽ nhìn thấy mail mà bạn sử dụng để xác minh danh tính.**")
@@ -133,8 +133,8 @@ class Verify( commands.Cog ):
         message["Subject"] = u"Mã xác nhận danh tính cho Discord cộng đồng Muốn Mở Mang"
 
         otpPart_vi: MIMEText = MIMEText("""
-            <body style=\"color: black;\">
-                <b style=\"font-size: 24px;\">Chào mừng tới với Discord cộng đồng Muốn Mở Mang.</b>
+            <body>
+                <h2>Chào mừng tới với Discord cộng đồng Muốn Mở Mang.</h2>
                 <br/><br/>
                 Dưới đây là mã xác nhận để bạn có thể xác minh danh tính khi tham gia server.
                 Vui lòng gửi đoạn code sau tới GDSC Community Bot để nhận được quyền truy cập. Vui lòng không gửi mã này tới bất kì ai ngoài GDSC Community Bot.
