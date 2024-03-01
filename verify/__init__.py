@@ -74,9 +74,9 @@ class Verify( commands.Cog ):
 
         # get user email from user prompt
         try:
-            userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=60.0)
+            userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
         except asyncio.TimeoutError:
-            await member.send(f"**Đã hết 60s nhưng bạn vẫn chưa điền email xác minh danh tính**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
+            await member.send(f"**Đã hết 5 phút nhưng bạn vẫn chưa điền email xác minh danh tính**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
 
         # store as another variable for easier reading and using
         userEmail: str = userEmailMessage.content
@@ -95,7 +95,7 @@ class Verify( commands.Cog ):
                 try:
                     userProvideOTP: discord.Message = await self.bot.wait_for('message', check=lambda x: True, timeout=120.0)
                 except asyncio.TimeoutError:
-                    await member.send(f"**Đã hết 120s nhưng bạn vẫn chưa điền OTP**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
+                    await member.send(f"**Đã hết 2 phút nhưng bạn vẫn chưa điền OTP**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
 
                 userProvideOTP.content = userProvideOTP.content.replace(' ', '')
                 if generatorOTP.verify(userProvideOTP.content):
@@ -117,11 +117,13 @@ class Verify( commands.Cog ):
                 # adding role to user
                 serverGuild: discord.Guild = self.bot.get_guild(1211629767384895488) # get GDSC Community Server guild
                 verifiedRole: discord.Role = serverGuild.get_role(1212412171804213248) # verified role id of GDSC Community Server
+                fishStudentRole: discord.Role = serverGuild.get_role(1211838068445679687) # fish student
                 stuPTITRole: discord.Role = serverGuild.get_role(1212613105012445244) # stu ptit role
                 # get author as member object
                 verifiedMember: discord.Member = member
                 try:
                     await verifiedMember.add_roles(verifiedRole)
+                    await verifiedMember.add_roles(fishStudentRole)
                     if "@stu.ptit.edu.vn" in userEmail:
                         await verifiedMember.add_roles(stuPTITRole)
                 except discord.Forbidden as e:
