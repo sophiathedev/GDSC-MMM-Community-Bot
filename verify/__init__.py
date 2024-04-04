@@ -3,16 +3,17 @@
 # for type hint
 from typing import * # pyright: ignore
 
-import discord, asyncio
+import discord, asyncio, re
 from discord.ext import commands, tasks
 from discord.abc import *
 
-from main import GDSCCommBot
+from main import GDSCCommBot, SERVER_ID, SERVER_VERIFY_CHANNEL, VERIFIED_ROLE, STUPTIT_ROLE, SERVER_WELCOME_CHANNEL
 
 from .otp import OTP
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.header import Header
 
 # view in verify channel
 class GlobalVerifyMsgView(discord.ui.View):
@@ -56,7 +57,7 @@ class Verify( commands.Cog ):
 
     @tasks.loop(count=1)
     async def createGlobalVerifyMessage( self ) -> None:
-        verifyChannel: discord.TextChannel = self.bot.get_guild(1211629767384895488).get_channel(1212631142017142814)
+        verifyChannel: discord.TextChannel = self.bot.get_guild(SERVER_ID).get_channel(SERVER_VERIFY_CHANNEL)
         await verifyChannel.send("**Dành cho những bạn chưa xác minh danh tính**\n\nCó một số bạn quên chưa điền mail trong quá trình xác nhận hoặc nhập mã OTP sai quá nhiều lần hoặc không nhận được mã OTP trong quá trình xác minh.\n\nCác bạn có thể tiến hành xác minh danh tính bằng cách ấn vào nút dưới đây !", view=GlobalVerifyMsgView(verifyCallback=self.verifyUser))
 
     #@commands.Cog.listener()
@@ -66,20 +67,26 @@ class Verify( commands.Cog ):
     async def verifyUser(self, member: discord.Member) -> None:
         await member.send("**CHÀO MỪNG BẠN ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC PTIT**\n\nBut, One more thing...\n\nBạn vui lòng gửi email của bạn để xác minh danh tính (<name>@stu.ptit.edu.vn | @gmail.com | @gdscptit.dev). **Lưu ý: admin sẽ nhìn thấy mail mà bạn sử dụng để xác minh danh tính.**")
 
+        # regex for matching the email
         def emailCheck( m: discord.Message ):
-            return ("@stu.ptit.edu.vn" in m.content) or ("@gmail.com" in m.content) or ("@gdscptit.dev" in m.content)
+            providedEmail: str = m.content
+            if not re.match(r'[A-Za-z0-9._%+-]+@(stu\.ptit\.edu\.vn|gdscptit\.dev|gmail\.com)', providedEmail):
+                return False
+            return True
 
         # server verify channel for mention
-        verifyChannel: (GuildChannel | PrivateChannel | discord.Thread | None) = self.bot.get_channel(1212631142017142814)
+        verifyChannel: (GuildChannel | PrivateChannel | discord.Thread | None) = self.bot.get_channel(SERVER_VERIFY_CHANNEL)
 
         # get user email from user prompt
         try:
             userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
         except asyncio.TimeoutError:
-            await member.send(f"**Đã hết 5 phút nhưng bạn vẫn chưa điền email xác minh danh tính**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
+            await member.send(f"**Đã hết 5 phút nhưng bạn vẫn chưa điền email xác minh danh tính (hoặc cũng có thể do email bạn nhập không đúng định dạng)**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
 
         # store as another variable for easier reading and using
         userEmail: str = userEmailMessage.content
+        userName: str = str('Ẩn sĩ') # user provided name
+        userStudentID: str = str('null') # student id if student come from PTIT
         generatorOTP: OTP = OTP(intervalTime=900) # OTP generator with expried time is 15 minutes as 900 seconds
         # store as another variable for easie reading and using
         currentOTPCode: str = generatorOTP.currentOTP
@@ -107,34 +114,67 @@ class Verify( commands.Cog ):
             if verifyComplete == False:
                 await countMessage.delete()
                 await member.send(f"**Xác minh danh tính thất bại**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
-            else:
-                # welcome channel
-                welcomeChannel: discord.TextChannel = self.bot.get_guild(1211629767384895488).get_channel(1211630156603457547)
-                # when verified complete
-                await countMessage.delete()
-                await member.send(f"**Xác minh danh tính thành công !**, Một lần nữa chào mừng bạn đến với cộng đồng \"Muốn Mở Mang\" của GDSC PTIT :partying_face:\n\nHãy cùng bắt đầu với {welcomeChannel.mention}")
+                return None
 
-                # adding role to user
-                serverGuild: discord.Guild = self.bot.get_guild(1211629767384895488) # get GDSC Community Server guild
-                verifiedRole: discord.Role = serverGuild.get_role(1212412171804213248) # verified role id of GDSC Community Server
-                fishStudentRole: discord.Role = serverGuild.get_role(1211838068445679687) # fish student
-                stuPTITRole: discord.Role = serverGuild.get_role(1212613105012445244) # stu ptit role
-                # get author as member object
-                verifiedMember: discord.Member = member
-                try:
-                    await verifiedMember.add_roles(verifiedRole)
-                    await verifiedMember.add_roles(fishStudentRole)
-                    if "@stu.ptit.edu.vn" in userEmail:
-                        await verifiedMember.add_roles(stuPTITRole)
-                except discord.Forbidden as e:
-                    raise e
+            # verify is completed
+            # welcome channel
+            welcomeChannel: discord.TextChannel = self.bot.get_guild(SERVER_ID).get_channel(SERVER_WELCOME_CHANNEL)
+            # when verified complete
+            await countMessage.delete()
+            await member.send(f"Nhân dạng của tiên sinh đã được xác nhận. **Vui lòng để lại quý danh**")
+            userName = await self.getVerifiedUserName(member)
+            # get student id if member using stu.ptit email for verify
+            if "@stu.ptit.edu.vn" in userEmail:
+                await member.send(f"Mời Quý Sinh viên Hoàng gia \"{userName}\" để lại Mật mã Hoàng gia của riêng bạn (mã sinh viên):")
+                userStudentID = await self.getVerifiedUserStudentID(member)
+                # regular expression for checking valid student id
+                if not re.match(r'[NEB]\d{2}\w{4}\d{3}', userStudentID, re.IGNORECASE):
+                    await member.send(f"**Rất tiếc !**\nMật mã Hoàng gia không đúng định dạng, nhân dạng không thể xác minh danh tính của quý sinh viên :x:")
+                    return None
+
+            await member.send(f"**Xác minh danh tính hoàn tất !**\nMột lần nữa chào mừng bạn đến với cộng đồng Muốn Mở Mang, bạn có thể bắt đầu tại {welcomeChannel.mention} !")
+
+            # create database query for data collect
+            insertQuery: str = "INSERT INTO users(discord_id, name, email, student_id) VALUES(%s,%s,%s,%s)"
+            self.bot.sql.execute(insertQuery, (member.id, userName, userEmail, userStudentID))
+            # already commit the transaction
+            self.bot.conn.commit()
+
+            # adding role to user
+            serverGuild: discord.Guild = self.bot.get_guild(SERVER_ID) # get GDSC Community Server guild
+            verifiedRole: discord.Role = serverGuild.get_role(VERIFIED_ROLE) # verified role id of GDSC Community Server
+            stuPTITRole: discord.Role = serverGuild.get_role(STUPTIT_ROLE) # stu ptit role
+            # get author as member object
+            verifiedMember: discord.Member = member
+            try:
+                await verifiedMember.add_roles(verifiedRole)
+                if "@stu.ptit.edu.vn" in userEmail:
+                    await verifiedMember.add_roles(stuPTITRole)
+            except discord.Forbidden as e:
+                raise e
+
+    # function for get the student id
+    async def getVerifiedUserStudentID(self, member: discord.Member) -> str:
+        try:
+            stuId: discord.Message = await self.bot.wait_for('message', check=lambda x: True, timeout=120.0)
+            return stuId.content
+        except asyncio.TimeoutError:
+            await member.send(f"**Đã hết 2 phút nhưng bạn vẫn chưa mã sinh viên của bạn**, nhưng không sao bạn có thể cung cấp nó sau !")
+
+    # function for getting name
+    async def getVerifiedUserName(self, member: discord.Member) -> str:
+        try:
+            name: discord.Message = await self.bot.wait_for('message', check=lambda x: True, timeout=120.0)
+            return name.content
+        except asyncio.TimeoutError:
+            await member.send(f"**Đã hết 2 phút nhưng bạn vẫn chưa điền tên của bạn**, nhưng không sao bạn có thể cung cấp nó sau !")
 
     # rewrite for reuseable
     def sendOTP(self, userEmail: str, OTP: str) -> bool:
 
         # create multipart utf-8 message
         message: MIMEMultipart = MIMEMultipart("alternative")
-        message["Subject"] = u"Mã xác nhận danh tính cho Discord cộng đồng Muốn Mở Mang"
+        message["Subject"] = Header("Mã xác nhận danh tính cho Discord cộng đồng Muốn Mở Mang", 'utf-8')
 
         otpPart_vi: MIMEText = MIMEText("""
             <body>
