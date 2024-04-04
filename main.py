@@ -8,11 +8,12 @@ from discord.ext import commands
 import logging
 import logging.handlers
 
-# sqlite3 database
-import sqlite3
+# replace sqlite3 by using postgresql
+import psycopg2 as psql
 
 from dotenv import dotenv_values
 
+# email usage
 from sendMail import Email
 
 from verify import *
@@ -20,10 +21,23 @@ from verify import *
 # get global environment variable
 environ = dotenv_values('.env')
 DISCORD_TOKEN: str = str(environ['TOKEN'])
-DATABASE_NAME: str = str(environ['DATABASE_NAME'])
 COMMAND_PREFIX: str = str(environ['COMMAND_PREFIX'])
 VERIFY_MAIL: str = str(environ['VERIFY_MAIL_EMAIL'])
 VERIFY_MAIL_PASSWORD: str = str(environ['VERIFY_MAIL_PASSWORD'])
+
+# database setup
+DB_USER: str = str(environ['DB_USER'])
+DB_NAME: str = str(environ['DB_NAME'])
+DB_PASSWORD: str = str(environ['DB_PASSWORD'])
+DB_HOST: str = str(environ['DB_HOST'])
+DB_PORT: str = str(environ['DB_PORT'])
+
+# dynamic id server setup
+SERVER_ID: int = int(environ['SERVER_ID'])
+SERVER_VERIFY_CHANNEL: int = int(environ['SERVER_VERIFY_CHANNEL'])
+SERVER_WELCOME_CHANNEL: int = int(environ['SERVER_WELCOME_CHANNEL'])
+VERIFIED_ROLE: int = int(environ['VERIFIED_ROLE'])
+STUPTIT_ROLE: int = int(environ['STUPTIT_ROLE'])
 
 class GDSCCommBot( commands.Bot ):
     def __init__( self, command_prefix: str,  self_bot:bool = False ) -> None:
@@ -47,9 +61,16 @@ class GDSCCommBot( commands.Bot ):
         self.log_handler.setFormatter(formatter)
         self.log.addHandler(self.log_handler)
 
-        # setup database sqlite3
-        self.db_conn = sqlite3.connect(DATABASE_NAME)
-        self.sql = self.db_conn.cursor() # this cursor will effect the database
+        # setup postgresql
+        self.conn = psql.connect(
+            database=DB_NAME,
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            port=DB_PORT
+        )
+        # postgre cursor
+        self.sql = self.conn.cursor()
 
         # inheritance for discord class
         super().__init__(command_prefix = command_prefix, self_bot = self_bot, intents=discord.Intents.all())
@@ -73,7 +94,9 @@ class GDSCCommBot( commands.Bot ):
             if message.content.startswith(COMMAND_PREFIX):
                 await self.process_commands(message)
                 self.log.info(f'\"{message.author.global_name}\" execute \"{message.content}\"')
-                self.db_conn.commit()
+
+            # commit transaction after every message
+            self.conn.commit()
         except commands.errors.CommandNotFound as e:
             if not message.content.startswith(COMMAND_PREFIX):
                 # perform the gdsc credit
@@ -91,8 +114,9 @@ class GDSCCommBot( commands.Bot ):
                 self.log.error(f'Reload module "{module}" error')
                 raise e
 
-
-
+    # setup destructor for close connect on postgresql
+    def __del__( self ):
+        self.conn.close()
 
 # run the bot
 if __name__ == "__main__":
