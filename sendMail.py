@@ -20,7 +20,10 @@ class Email:
 
         # use ssl default context for securing with starttls
         self.sslContext: ssl.SSLContext = ssl.create_default_context()
+        self.connect()
 
+    # create connection to smtp server
+    def connect(self) -> None:
         # create connect
         try:
             self.senderServer: smtplib.SMTP = smtplib.SMTP( self.smtpHost, self.smtpPort )
@@ -39,6 +42,9 @@ class Email:
         """
         try:
             self.senderServer.sendmail( self.senderEmail, receiverEmail, message.as_string() )
+        except smtplib.SMTPSenderRefused:
+            self.connect()
+            self.send(receiverEmail, message)
         except Exception as e:
             raise e
             return False
