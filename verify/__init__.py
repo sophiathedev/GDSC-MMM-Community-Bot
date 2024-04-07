@@ -18,7 +18,7 @@ from email.header import Header
 # view in verify channel
 class GlobalVerifyMsgView(discord.ui.View):
     def __init__(self, verifyCallback: Callable) -> None:
-        super().__init__()
+        super().__init__(timeout=None)
         self.verifyCallback: Callable = verifyCallback
 
     @discord.ui.button(label="Xác minh danh tính", style=discord.ButtonStyle.green)
@@ -29,7 +29,7 @@ class GlobalVerifyMsgView(discord.ui.View):
 
 class DoesntReceiveOTPView(discord.ui.View):
     def __init__(self, sendOTPCallback: Callable, userEmail: str, currentOTP: str) -> None:
-        super().__init__()
+        super().__init__(timeout=None)
 
         self.sendOTPCallback: Callable = sendOTPCallback
         self.userEmail: str = userEmail
