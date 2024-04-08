@@ -135,7 +135,7 @@ class Verify( commands.Cog ):
             await member.send(f"**Xác minh danh tính hoàn tất !**\nMột lần nữa chào mừng bạn đến với cộng đồng Muốn Mở Mang, bạn có thể bắt đầu tại {welcomeChannel.mention} !")
 
             # create database query for data collect
-            insertQuery: str = "INSERT INTO users(discord_id, name, email, student_id) VALUES(%s,%s,%s,%s)"
+            insertQuery: str = "INSERT OR IGNORE INTO users(discord_id, name, email, student_id) VALUES(%s,%s,%s,%s)"
             self.bot.sql.execute(insertQuery, (member.id, userName, userEmail, userStudentID))
             # already commit the transaction
             self.bot.conn.commit()
