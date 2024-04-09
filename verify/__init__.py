@@ -65,7 +65,7 @@ class Verify( commands.Cog ):
     #    await self.verifyUser(member)
 
     async def verifyUser(self, member: discord.Member) -> None:
-        await member.send("**CHÀO MỪNG BẠN ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC PTIT**\n\nBut, One more thing...\n\nBạn vui lòng gửi email của bạn để xác minh danh tính (<name>@stu.ptit.edu.vn | @gmail.com | @gdscptit.dev). **Lưu ý: admin sẽ nhìn thấy mail mà bạn sử dụng để xác minh danh tính.**")
+        await member.send("**CHÀO MỪNG CÁC HẠ ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC-PTIT**\n\n Các hạ vui lòng điền email để xác minh danh tính (<name>@stu.ptit.edu.vn | @gdscptit.dev | @gmail.com). **Lưu ý: admin sẽ nhìn thấy email các hạ dùng xác minh danh tính.**")
 
         # regex for matching the email
         def emailCheck( m: discord.Message ):
@@ -81,7 +81,7 @@ class Verify( commands.Cog ):
         try:
             userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
         except asyncio.TimeoutError:
-            await member.send(f"**Đã hết 5 phút nhưng bạn vẫn chưa điền email xác minh danh tính (hoặc cũng có thể do email bạn nhập không đúng định dạng)**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
+            await member.send(f"**Đã hết 5 phút nhưng các hạ vẫn chưa điền email xác minh danh tính (cũng có thể do email các hạ vừa nhập không đúng định dạng)**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
 
         # store as another variable for easier reading and using
         userEmail: str = userEmailMessage.content
@@ -98,11 +98,11 @@ class Verify( commands.Cog ):
             verifyComplete = False
             countMessage: discord.Message = await member.send(f"Bạn còn **{3 - failCount}** lần thử mã.")
             while failCount < 3:
-                await countMessage.edit(content=f"Bạn còn **{3 - failCount}** lần thử mã.")
+                await countMessage.edit(content=f"Các hạ còn **{3 - failCount}** cơ hội thử mã.")
                 try:
                     userProvideOTP: discord.Message = await self.bot.wait_for('message', check=lambda x: True, timeout=120.0)
                 except asyncio.TimeoutError:
-                    await member.send(f"**Đã hết 2 phút nhưng bạn vẫn chưa điền OTP**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
+                    await member.send(f"**Đã hết 2 phút nhưng chưa thấy các hạ điền OTP**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
 
                 userProvideOTP.content = userProvideOTP.content.replace(' ', '')
                 if generatorOTP.verify(userProvideOTP.content):
@@ -113,7 +113,7 @@ class Verify( commands.Cog ):
 
             if verifyComplete == False:
                 await countMessage.delete()
-                await member.send(f"**Xác minh danh tính thất bại**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
+                await member.send(f"**Danh tính các hạ chưa thể xác minh**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
                 return None
 
             # verify is completed
