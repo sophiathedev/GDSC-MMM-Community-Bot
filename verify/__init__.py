@@ -67,8 +67,16 @@ class Verify( commands.Cog ):
     async def verifyUser(self, member: discord.Member) -> None:
         await member.send("**CHÀO MỪNG CÁC HẠ ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC-PTIT**\n\n Các hạ vui lòng điền email để xác minh danh tính (<name>@stu.ptit.edu.vn | @gdscptit.dev | @gmail.com). **Lưu ý: admin sẽ nhìn thấy email các hạ dùng xác minh danh tính.**")
 
+        # checking process for each DM
+        def check_dm( m: discord.Message ):
+            if m.author != member or not isinstance(m.channel, discord.DMChannel):
+                return False
+            return True
+
         # regex for matching the email
         def emailCheck( m: discord.Message ):
+            if check_dm(m) == False:
+                return False
             providedEmail: str = m.content
             if not re.match(r'[A-Za-z0-9._%+-]+@(stu\.ptit\.edu\.vn|gdscptit\.dev|gmail\.com)', providedEmail):
                 return False
@@ -100,7 +108,7 @@ class Verify( commands.Cog ):
             while failCount < 3:
                 await countMessage.edit(content=f"Các hạ còn **{3 - failCount}** cơ hội thử mã.")
                 try:
-                    userProvideOTP: discord.Message = await self.bot.wait_for('message', check=lambda x: True, timeout=120.0)
+                    userProvideOTP: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=120.0)
                 except asyncio.TimeoutError:
                     await member.send(f"**Đã hết 2 phút nhưng chưa thấy các hạ điền OTP**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
 
@@ -158,16 +166,24 @@ class Verify( commands.Cog ):
 
     # function for get the student id
     async def getVerifiedUserStudentID(self, member: discord.Member) -> str:
+        def check_dm( m: discord.Message ):
+            if m.author != member or not isinstance(m.channel, discord.DMChannel):
+                return False
+            return True
         try:
-            stuId: discord.Message = await self.bot.wait_for('message', check=lambda x: True, timeout=120.0)
+            stuId: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=120.0)
             return stuId.content
         except asyncio.TimeoutError:
             await member.send(f"**Đã hết 2 phút nhưng bạn vẫn chưa mã sinh viên của bạn**, nhưng không sao bạn có thể cung cấp nó sau !")
 
     # function for getting name
     async def getVerifiedUserName(self, member: discord.Member) -> str:
+        def check_dm( m: discord.Message ):
+            if m.author != member or not isinstance(m.channel, discord.DMChannel):
+                return False
+            return True
         try:
-            name: discord.Message = await self.bot.wait_for('message', check=lambda x: True, timeout=120.0)
+            name: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=120.0)
             return name.content
         except asyncio.TimeoutError:
             await member.send(f"**Đã hết 2 phút nhưng bạn vẫn chưa điền tên của bạn**, nhưng không sao bạn có thể cung cấp nó sau !")
