@@ -87,15 +87,12 @@ class GDSCCommBot( commands.Bot ):
         await self.change_presence(activity=discord.Game(name="Muốn Mở Mang"))
 
     async def on_message( self, message: discord.Message ) -> None:
-        # if message sent by a bot do nothing
         if message.author.bot:
             return None
         try:
+            await self.process_commands(message)
             if message.content.startswith(COMMAND_PREFIX):
-                await self.process_commands(message)
                 self.log.info(f'\"{message.author.global_name}\" execute \"{message.content}\"')
-
-            # commit transaction after every message
             self.conn.commit()
         except commands.errors.CommandNotFound as e:
             if not message.content.startswith(COMMAND_PREFIX):
