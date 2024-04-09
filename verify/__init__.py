@@ -150,6 +150,9 @@ class Verify( commands.Cog ):
                 await verifiedMember.add_roles(verifiedRole)
                 if "@stu.ptit.edu.vn" in userEmail:
                     await verifiedMember.add_roles(stuPTITRole)
+                    await verifiedMember.edit(nick=f"{userName} - {userStudentID}")
+                else:
+                    await verifiedMember.edit(nick=f"{userName}")
             except discord.Forbidden as e:
                 raise e
 
