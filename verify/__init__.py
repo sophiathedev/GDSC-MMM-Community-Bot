@@ -67,10 +67,6 @@ class Verify( commands.Cog ):
     async def verifyUser(self, member: discord.Member) -> None:
         self.bot.sql.execute(f'SELECT discord_id FROM users where discord_id = \'{member.id}\'')
         queryExists = self.bot.sql.fetchone()
-        self.bot.sql.execute(f'SELECT student_id FROM users')
-        listStudentID = self.bot.sql.fetchall()
-        self.bot.sql.execute(f'SELECT email FROm users')
-        listEmail = self.bot.sql.fetchall()
         if not queryExists is None:
             await member.send("\n**Bạn đã xác minh danh tính rồi vui lòng quay trở lại :face_with_symbols_over_mouth:**\n")
             return None
@@ -97,11 +93,7 @@ class Verify( commands.Cog ):
 
         # get user email from user prompt
         try:
-            while True:
-                userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
-                if not tuple(userEmailMessage.content) in listEmail:
-                    break
-                await member.send(f"Email **\"{userEmailMessage}\"** hiện đã có người sử dụng, vui lòng sử dụng một email khác !")
+            userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
         except asyncio.TimeoutError:
             await member.send(f"**Đã hết 5 phút nhưng các hạ vẫn chưa điền email xác minh danh tính (cũng có thể do email các hạ vừa nhập không đúng định dạng)**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
 
@@ -152,9 +144,6 @@ class Verify( commands.Cog ):
                 # regular expression for checking valid student id
                 if not re.match(r'[NEB]\d{2}\w{4}\d{3}', userStudentID, re.IGNORECASE):
                     await member.send(f"**Rất tiếc !**\nMật mã Hoàng gia không đúng định dạng, nhân dạng không thể xác minh danh tính của quý sinh viên :x:")
-                    return None
-                elif tuple(userStudentID) in listStudentID:
-                    await member.send(f"**Rất tiếc !**\nMật mã Hoàng gia đã được định danh cho một người khác, nhân dạng không thể xác minh danh tính của quý sinh viên :x:")
                     return None
 
             await member.send(f"**Xác minh danh tính hoàn tất !**\nMột lần nữa chào mừng bạn đến với cộng đồng Muốn Mở Mang, bạn có thể bắt đầu tại {welcomeChannel.mention} !")
