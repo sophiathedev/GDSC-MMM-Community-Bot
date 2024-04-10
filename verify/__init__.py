@@ -65,9 +65,12 @@ class Verify( commands.Cog ):
     #    await self.verifyUser(member)
 
     async def verifyUser(self, member: discord.Member) -> None:
-        queryExists   = self.bot.sql.execute(f'SELECT discord_id FROM users where discord_id = \'{member.id}\'').fetchone()
-        listStudentID = self.bot.sql.execute(f'SELECT student_id FROM users').fetchall()
-        listEmail     = self.bot.sql.execute(f'SELECT email FROm users').fetchall()
+        self.bot.sql.execute(f'SELECT discord_id FROM users where discord_id = \'{member.id}\'')
+        queryExists = self.bot.sql.fetchone()
+        self.bot.sql.execute(f'SELECT student_id FROM users')
+        listStudentID = self.bot.sql.fetchall()
+        self.bot.sql.execute(f'SELECT email FROm users')
+        listEmail = self.bot.sql.fetchall()
         if not queryExists is None:
             await member.send("\n**Bạn đã xác minh danh tính rồi vui lòng quay trở lại :face_with_symbols_over_mouth:**\n")
             return None
