@@ -84,7 +84,7 @@ class Verify( commands.Cog ):
             if check_dm(m) == False:
                 return False
             providedEmail: str = m.content
-            if not re.match(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$', providedEmail):
+            if not re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,4})+', providedEmail):
                 return False
             return True
 
