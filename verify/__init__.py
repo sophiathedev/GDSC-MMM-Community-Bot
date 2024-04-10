@@ -65,8 +65,9 @@ class Verify( commands.Cog ):
     #    await self.verifyUser(member)
 
     async def verifyUser(self, member: discord.Member) -> None:
-        queryExists = self.bot.sql.execute(f'SELECT discord_id FROM users where discord_id = \"{member.id}\"').fetchone()
+        queryExists   = self.bot.sql.execute(f'SELECT discord_id FROM users where discord_id = \"{member.id}\"').fetchone()
         listStudentID = self.bot.sql.execute(f'SELECT student_id FROM users').fetchall()
+        listEmail     = self.bot.sql.execute(f'SELECT email FROm users').fetchall()
         if not queryExists is None:
             await member.send("\n**Bạn đã xác minh danh tính rồi vui lòng quay trở lại :face_with_symbols_over_mouth:**\n")
             return None
@@ -93,7 +94,11 @@ class Verify( commands.Cog ):
 
         # get user email from user prompt
         try:
-            userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
+            while True:
+                userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
+                if not userEmailMessage in listEmail:
+                    break
+                await member.send(f"Email **\"{userEmailMessage}\"** hiện đã có người sử dụng, vui lòng sử dụng một email khác !")
         except asyncio.TimeoutError:
             await member.send(f"**Đã hết 5 phút nhưng các hạ vẫn chưa điền email xác minh danh tính (cũng có thể do email các hạ vừa nhập không đúng định dạng)**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
 
