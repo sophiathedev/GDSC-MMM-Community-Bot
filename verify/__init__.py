@@ -65,7 +65,7 @@ class Verify( commands.Cog ):
     #    await self.verifyUser(member)
 
     async def verifyUser(self, member: discord.Member) -> None:
-        queryExists   = self.bot.sql.execute(f'SELECT discord_id FROM users where discord_id = \"{member.id}\"').fetchone()
+        queryExists   = self.bot.sql.execute(f'SELECT "discord_id" FROM users where discord_id = \"{member.id}\"').fetchone()
         listStudentID = self.bot.sql.execute(f'SELECT student_id FROM users').fetchall()
         listEmail     = self.bot.sql.execute(f'SELECT email FROm users').fetchall()
         if not queryExists is None:
