@@ -99,7 +99,7 @@ class Verify( commands.Cog ):
         try:
             while True:
                 userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
-                if not tuple(userEmailMessage) in listEmail:
+                if not tuple(userEmailMessage.content) in listEmail:
                     break
                 await member.send(f"Email **\"{userEmailMessage}\"** hiện đã có người sử dụng, vui lòng sử dụng một email khác !")
         except asyncio.TimeoutError:
