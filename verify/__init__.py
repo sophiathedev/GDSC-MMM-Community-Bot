@@ -190,8 +190,8 @@ class Verify( commands.Cog ):
             return True
         try:
             name: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=120.0)
-            name = ' '.join(list(map(lambda x: x.capitalize(), name.split(' '))))
-            return name.content
+            name = ' '.join(list(map(lambda x: x.capitalize(), name.content.split(' '))))
+            return name
         except asyncio.TimeoutError:
             await member.send(f"**Đã hết 2 phút nhưng bạn vẫn chưa điền tên của bạn**, nhưng không sao bạn có thể cung cấp nó sau !")
 
