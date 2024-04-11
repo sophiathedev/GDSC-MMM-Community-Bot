@@ -88,7 +88,7 @@ class Verify( commands.Cog ):
                     await member.send(f"**Email sử dụng không hợp lệ !**")
                     continue
 
-                self.bot.sql.execute('SELECT email FROM users WHERE email = %s', (userEmailMessage.content))
+                self.bot.sql.execute('SELECT email FROM users WHERE email = \'%s\'', (userEmailMessage.content))
                 emailExists = self.bot.sql.fetchone()
                 if not emailExists is None:
                     await member.send("\n**Email này hiện đã có người sử dụng :face_with_symbols_over_mouth:**\n")
