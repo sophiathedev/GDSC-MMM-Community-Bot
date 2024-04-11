@@ -105,6 +105,9 @@ class Verify( commands.Cog ):
             countMessage: discord.Message = await member.send(f"Bạn còn **{3 - failCount}** lần thử mã.")
             while failCount < 3:
                 await countMessage.edit(content=f"Các hạ còn **{3 - failCount}** cơ hội thử mã.")
+                userProvideOTP: discord.Message = discord.Message()
+                # default setup the default provided otp
+                userProvideOTP.content = "-1-1-1-1 -1-1-1-1"
                 try:
                     userProvideOTP: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=120.0)
                 except asyncio.TimeoutError:
