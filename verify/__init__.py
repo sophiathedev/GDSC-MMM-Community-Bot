@@ -75,25 +75,17 @@ class Verify( commands.Cog ):
 
         # checking process for each DM
         def check_dm( m: discord.Message ):
-            if m.author != member or not isinstance(m.channel, discord.DMChannel):
-                return False
-            return True
-
-        # regex for matching the email
-        def emailCheck( m: discord.Message ):
-            if check_dm(m) == False:
-                return False
-            providedEmail: str = m.content
-            if not re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,4})+', providedEmail):
-                return False
-            return True
+            return m.author == member and isinstance(m.channel, discord.DMChannel)
 
         # server verify channel for mention
         verifyChannel: (GuildChannel | PrivateChannel | discord.Thread | None) = self.bot.get_channel(SERVER_VERIFY_CHANNEL)
 
         # get user email from user prompt
         try:
-            userEmailMessage: discord.Message = await self.bot.wait_for('message', check=emailCheck, timeout=300.0)
+            userEmailMessage: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=300.0)
+            if not re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,4})+', userEmailMessage.content):
+                await member.send(f"**Email sử dụng không hợp lệ !**")
+                return None
         except asyncio.TimeoutError:
             await member.send(f"**Đã hết 5 phút nhưng các hạ vẫn chưa điền email xác minh danh tính (cũng có thể do email các hạ vừa nhập không đúng định dạng)**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
 
