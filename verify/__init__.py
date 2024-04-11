@@ -81,13 +81,23 @@ class Verify( commands.Cog ):
         verifyChannel: (GuildChannel | PrivateChannel | discord.Thread | None) = self.bot.get_channel(SERVER_VERIFY_CHANNEL)
 
         # get user email from user prompt
-        try:
-            userEmailMessage: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=300.0)
-            if not re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,4})+', userEmailMessage.content):
-                await member.send(f"**Email sử dụng không hợp lệ !**")
+        while True:
+            try:
+                userEmailMessage: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=300.0)
+                if not re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,4})+', userEmailMessage.content):
+                    await member.send(f"**Email sử dụng không hợp lệ !**")
+                    continue
+
+                self.bot.sql.execute('SELECT email FROM users WHERE email = %s', (userEmailMessage.content))
+                emailExists = self.bot.sql.fetchone()
+                if not emailExists is None:
+                    await member.send("\n**Email này hiện đã có người sử dụng :face_with_symbols_over_mouth:**\n")
+                    continue
+                else:
+                    break
+            except asyncio.TimeoutError:
+                await member.send(f"**Đã hết 5 phút nhưng các hạ vẫn chưa điền email xác minh danh tính (cũng có thể do email các hạ vừa nhập không đúng định dạng)**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
                 return None
-        except asyncio.TimeoutError:
-            await member.send(f"**Đã hết 5 phút nhưng các hạ vẫn chưa điền email xác minh danh tính (cũng có thể do email các hạ vừa nhập không đúng định dạng)**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
 
         # store as another variable for easier reading and using
         userEmail: str = userEmailMessage.content
