@@ -71,7 +71,7 @@ class Verify( commands.Cog ):
             await member.send("\n**Bạn đã xác minh danh tính rồi vui lòng quay trở lại :face_with_symbols_over_mouth:**\n")
             return None
 
-        await member.send("**CHÀO MỪNG CÁC HẠ ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC-PTIT**\n\n Các hạ vui lòng điền email để xác minh danh tính (<name>@stu.ptit.edu.vn | @gdscptit.dev | @gmail.com). **Lưu ý: admin sẽ nhìn thấy email các hạ dùng xác minh danh tính.**")
+        await member.send("**CHÀO MỪNG CÁC HẠ ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC-PTIT**\n\nCác hạ vui lòng điền email để xác minh danh tính (<name>@stu.ptit.edu.vn | @gdscptit.dev | @gmail.com). **Lưu ý: admin sẽ nhìn thấy email các hạ dùng xác minh danh tính.**")
 
         # checking process for each DM
         def check_dm( m: discord.Message ):
@@ -115,22 +115,20 @@ class Verify( commands.Cog ):
             countMessage: discord.Message = await member.send(f"Bạn còn **{3 - failCount}** lần thử mã.")
             while failCount < 3:
                 await countMessage.edit(content=f"Các hạ còn **{3 - failCount}** cơ hội thử mã.")
-                userProvideOTP = None
                 try:
                     userProvideOTP: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=120.0)
+                    userProvideOTP.content = userProvideOTP.content.replace(' ', '')
+                    if generatorOTP.verify(userProvideOTP.content):
+                        verifyComplete = True
+                        break
+                    else:
+                        failCount += 1
                 except asyncio.TimeoutError:
-                    await member.send(f"**Đã hết 2 phút nhưng chưa thấy các hạ điền OTP**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
-
-                userProvideOTP.content = userProvideOTP.content.replace(' ', '')
-                if generatorOTP.verify(userProvideOTP.content):
-                    verifyComplete = True
-                    break
-                else:
-                    failCount += 1
+                    await member.send(f"**Đã hết 2 phút nhưng chưa thấy các hạ điền OTP**.\nĐể xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
 
             if verifyComplete == False:
                 await countMessage.delete()
-                await member.send(f"**Danh tính các hạ chưa thể xác minh**.\n Để xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
+                await member.send(f"**Danh tính các hạ chưa thể xác minh**.\nĐể xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
                 return None
 
             # verify is completed
