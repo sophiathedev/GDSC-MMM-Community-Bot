@@ -208,9 +208,9 @@ class Verify( commands.Cog ):
                 <h2>Chào mừng tới với Discord cộng đồng Muốn Mở Mang.</h2>
                 <br/><br/>
                 Dưới đây là mã xác nhận để bạn có thể xác minh danh tính khi tham gia server.
-                Vui lòng gửi đoạn code sau tới GDSC Community Bot để nhận được quyền truy cập. Vui lòng không gửi mã này tới bất kì ai ngoài GDSC Community Bot.
+                Vui lòng gửi đoạn code sau tới MMM Verify Bot để nhận được quyền truy cập. Vui lòng không gửi mã này tới bất kì ai ngoài MMM Verify Bot.
                 <br/><br/>
-                Mã xác nhận danh tính của bạn: <b>{0} {1}</b>.
+                Mã xác nhận danh tính của bạn: <b>{0} {1}</b>
             </body>
         """.format(OTP[0:4], OTP[4:]), 'html')
 
