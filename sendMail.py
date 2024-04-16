@@ -44,7 +44,7 @@ class Email:
             self.senderServer.sendmail( self.senderEmail, receiverEmail, message.as_string() )
         except smtplib.SMTPSenderRefused:
             self.connect()
-            self.send(receiverEmail, message)
+            return self.send(receiverEmail, message)
         except Exception as e:
             raise e
             return False
