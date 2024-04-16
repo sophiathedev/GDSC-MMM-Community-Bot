@@ -143,8 +143,8 @@ class Verify( commands.Cog ):
             await member.send(f"Nhân dạng của tiên sinh đã được xác nhận. **Vui lòng để lại quý danh (đầy đủ Họ và Tên)**:")
             userName = await self.getVerifiedUserName(member)
             splitedUsername = userName.split(' ')
-            firstName = splitedUsername[0].capitalize()
-            splitedUsername = splitedUsername[1:]
+            firstName = splitedUsername[-1].capitalize()
+            splitedUsername = splitedUsername[:-1]
             for i in range(0, len(splitedUsername)):
                 if len(splitedUsername[i]) > 1:
                     splitedUsername[i] = splitedUsername[i][0].upper()
