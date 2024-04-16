@@ -71,7 +71,7 @@ class Verify( commands.Cog ):
             await member.send("\n**Bạn đã xác minh danh tính rồi vui lòng quay trở lại :face_with_symbols_over_mouth:**\n")
             return None
 
-        await member.send("**CHÀO MỪNG CÁC HẠ ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC-PTIT**\n\nCác hạ vui lòng điền email để xác minh danh tính (<name>@stu.ptit.edu.vn | @gdscptit.dev | @gmail.com). **Lưu ý: admin sẽ nhìn thấy email các hạ dùng xác minh danh tính.**")
+        await member.send("**CHÀO MỪNG CÁC HẠ ĐẾN VỚI CỘNG ĐỒNG \"MUỐN MỞ MANG\" CỦA GDSC-PTIT**\n\nCác hạ vui lòng cung cấp **email PTIT** để xác minh danh tính (<name>@stu.ptit.edu.vn). **Lưu ý: admin sẽ nhìn thấy email các hạ dùng xác minh danh tính.**")
 
         # checking process for each DM
         def check_dm( m: discord.Message ):
@@ -84,8 +84,12 @@ class Verify( commands.Cog ):
         while True:
             try:
                 userEmailMessage: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=300.0)
+                userEmailMessage.content = userEmailMessage.content.lower()
                 if not re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,4})+', userEmailMessage.content):
                     await member.send(f"**Email sử dụng không hợp lệ !**")
+                    continue
+                elif not "@stu.ptit.edu.vn" in userEmailMessage.content:
+                    await member.send(f"**Email của bạn sử dụng không phải email của sinh viên PTIT, vui lòng thử lại !!!**")
                     continue
 
                 self.bot.sql.execute(f'SELECT email FROM users WHERE email = \'{userEmailMessage.content}\'')
@@ -136,18 +140,16 @@ class Verify( commands.Cog ):
             welcomeChannel: discord.TextChannel = self.bot.get_guild(SERVER_ID).get_channel(SERVER_WELCOME_CHANNEL)
             # when verified complete
             await countMessage.delete()
-            await member.send(f"Nhân dạng của tiên sinh đã được xác nhận. **Vui lòng để lại quý danh**")
+            await member.send(f"Nhân dạng của tiên sinh đã được xác nhận. **Vui lòng để lại quý danh (đầy đủ Họ và Tên)**:")
             userName = await self.getVerifiedUserName(member)
             # get student id if member using stu.ptit email for verify
-            if "@stu.ptit.edu.vn" in userEmail:
-                await member.send(f"Mời Quý Sinh viên Hoàng gia \"{userName}\" để lại Mật mã Hoàng gia của riêng bạn (mã sinh viên):")
-                userStudentID = await self.getVerifiedUserStudentID(member)
-                # regular expression for checking valid student id
-                if not re.match(r'[NEB]\d{2}\w{4}\d{3}', userStudentID, re.IGNORECASE):
-                    await member.send(f"**Rất tiếc !**\nMật mã Hoàng gia không đúng định dạng, nhân dạng không thể xác minh danh tính của quý sinh viên :x:")
-                    return None
+            await member.send(f"Mời Quý Sinh viên Hoàng gia \"{userName}\" để lại Mật mã Hoàng gia của riêng bạn (mã sinh viên):")
+            userStudentID = await self.getVerifiedUserStudentID(member)
+            # regular expression for checking valid student id
+            if not re.match(r'[NEB]\d{2}\w{4}\d{3}', userStudentID, re.IGNORECASE):
+                await member.send(f"**Rất tiếc !**\nMật mã Hoàng gia không đúng định dạng, nhân dạng không thể xác minh danh tính của quý sinh viên :x:")
+                return None
 
-            await member.send(f"**Xác minh danh tính hoàn tất !**\nMột lần nữa chào mừng bạn đến với cộng đồng Muốn Mở Mang, bạn có thể bắt đầu tại {welcomeChannel.mention} !")
 
             # create database query for data collect
             insertQuery: str = "INSERT INTO users(discord_id, name, email, student_id) VALUES(%s,%s,%s,%s)"
@@ -170,6 +172,8 @@ class Verify( commands.Cog ):
                     await verifiedMember.edit(nick=f"{userName}")
             except discord.Forbidden as e:
                 raise e
+
+            await member.send(f"**Xác minh danh tính hoàn tất !**\nMột lần nữa chào mừng bạn đến với cộng đồng Muốn Mở Mang, bạn có thể bắt đầu tại {welcomeChannel.mention} !")
 
     # function for get the student id
     async def getVerifiedUserStudentID(self, member: discord.Member) -> str:
