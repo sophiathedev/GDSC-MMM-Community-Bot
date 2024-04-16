@@ -143,11 +143,12 @@ class Verify( commands.Cog ):
             await member.send(f"Nhân dạng của tiên sinh đã được xác nhận. **Vui lòng để lại quý danh (đầy đủ Họ và Tên)**:")
             userName = await self.getVerifiedUserName(member)
             splitedUsername = userName.split(' ')
-            splitedUsername[0] = splitedUsername[0].capitalize()
-            for i in range(1, len(splitedUsername)):
+            firstName = splitedUsername[0].capitalize()
+            splitedUsername = splitedUsername[1:]
+            for i in range(0, len(splitedUsername)):
                 if len(splitedUsername[i]) > 1:
                     splitedUsername[i] = splitedUsername[i][0].upper()
-            userName = ''.join(splitedUsername)
+            userName = firstName + ''.join(splitedUsername)
             # get student id if member using stu.ptit email for verify
             await member.send(f"Mời Quý Sinh viên Hoàng gia \"{userName}\" để lại Mật mã Hoàng gia của riêng bạn (mã sinh viên):")
             userStudentID = await self.getVerifiedUserStudentID(member)
