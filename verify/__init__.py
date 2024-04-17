@@ -88,7 +88,10 @@ class Verify( commands.Cog ):
                 if not re.match(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,4})+', userEmailMessage.content):
                     await member.send(f"**Email sử dụng không hợp lệ !**")
                     continue
-                elif not "@stu.ptit.edu.vn" in userEmailMessage.content:
+
+                # condition for ptit in site the domain name of email
+                splitedEmail = userEmailMessage.content.split('@')
+                if not "ptit" in splitedEmail[1]:
                     await member.send(f"**Email của bạn sử dụng không phải email của sinh viên PTIT, vui lòng thử lại !!!**")
                     continue
 
