@@ -132,6 +132,7 @@ class Verify( commands.Cog ):
                         failCount += 1
                 except asyncio.TimeoutError:
                     await member.send(f"**Đã hết 2 phút nhưng chưa thấy các hạ điền OTP**.\nĐể xác minh danh tính các hạ vui lòng vào discord server của Muốn Mở Mang thực hiện xác minh tại channel {verifyChannel.mention}")
+                    return None
 
             if verifyComplete == False:
                 await countMessage.delete()
