@@ -61,6 +61,17 @@ class GDSCCommBot( commands.Bot ):
         self.log_handler.setFormatter(formatter)
         self.log.addHandler(self.log_handler)
 
+        # setup postgresql
+        self.conn = psql.connect(
+            database=DB_NAME,
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            port=DB_PORT
+        )
+        # postgre cursor
+        self.sql = self.conn.cursor()
+
         # inheritance for discord class
         super().__init__(command_prefix = command_prefix, self_bot = self_bot, intents=discord.Intents.all())
 
