@@ -7,9 +7,11 @@ import discord, asyncio, re
 from discord.ext import commands, tasks
 from discord.abc import *
 
-from main import GDSCCommBot, SERVER_ID, SERVER_VERIFY_CHANNEL, VERIFIED_ROLE, STUPTIT_ROLE, SERVER_WELCOME_CHANNEL
+from main import GDSCCommBot, SERVER_ID, SERVER_VERIFY_CHANNEL, VERIFIED_ROLE, STUPTIT_ROLE, SERVER_WELCOME_CHANNEL, DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER
 
 from .otp import OTP
+
+import psycopg2 as psql
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -47,6 +49,7 @@ class Verify( commands.Cog ):
         self.bot: GDSCCommBot = bot
 
         self.createGlobalVerifyMessage.start()
+        self.restart_psql_connect.start()
 
     # ping command first basical command for discord bot
     @commands.command( name="ping", description="Lấy thời gian phàn hồi của bot", brief="Lấy thời gian phản hồi của bot" )
@@ -54,6 +57,19 @@ class Verify( commands.Cog ):
         # calculate ping as milliseconds
         packetPing: int = int(self.bot.latency * 1000)
         await ctx.send(':ping_pong: **Pong! {0:,}ms**'.format(packetPing))
+
+    @tasks.loop(hours=12)
+    async def restart_psql_connect(self):
+        # setup postgresql
+        self.bot.conn = psql.connect(
+            database=DB_NAME,
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            port=DB_PORT
+        )
+        # postgre cursor
+        self.bot.sql = self.conn.cursor()
 
     @tasks.loop(count=1)
     async def createGlobalVerifyMessage( self ) -> None:
