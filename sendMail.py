@@ -42,11 +42,11 @@ class Email:
         """
         try:
             self.senderServer.sendmail( self.senderEmail, receiverEmail, message.as_string() )
-        except smtplib.SMTPSenderRefused:
+        except (smtplib.SMTPSenderRefused, smtplib.SMTPServerDisconnected) as e:
             self.connect()
             return self.send(receiverEmail, message)
         except Exception as e:
-            raise e
+            print(e)
             return False
         else:
             return True
