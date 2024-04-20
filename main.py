@@ -61,6 +61,19 @@ class GDSCCommBot( commands.Bot ):
         self.log_handler.setFormatter(formatter)
         self.log.addHandler(self.log_handler)
 
+        # inheritance for discord class
+        super().__init__(command_prefix = command_prefix, self_bot = self_bot, intents=discord.Intents.all())
+
+        # initialize the psql connection
+        self.restart_psql_connect.start()
+
+        # current bot client
+        #self.bot_client = discord.Client( intents = discord.Intents.all() )
+
+        self.__init_dev_command()
+
+    @tasks.loop(hours=12)
+    async def restart_psql_connect(self):
         # setup postgresql
         self.conn = psql.connect(
             database=DB_NAME,
@@ -71,14 +84,6 @@ class GDSCCommBot( commands.Bot ):
         )
         # postgre cursor
         self.sql = self.conn.cursor()
-
-        # inheritance for discord class
-        super().__init__(command_prefix = command_prefix, self_bot = self_bot, intents=discord.Intents.all())
-
-        # current bot client
-        #self.bot_client = discord.Client( intents = discord.Intents.all() )
-
-        self.__init_dev_command()
 
     async def on_ready( self ) -> None:
         # when the bot ready load for cog
