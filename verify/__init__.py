@@ -69,7 +69,7 @@ class Verify( commands.Cog ):
             port=DB_PORT
         )
         # postgre cursor
-        self.bot.sql = self.conn.cursor()
+        self.bot.sql = self.bot.conn.cursor()
 
     @tasks.loop(count=1)
     async def createGlobalVerifyMessage( self ) -> None:
