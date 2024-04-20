@@ -185,6 +185,8 @@ class Verify( commands.Cog ):
                 raise e
 
             await member.send(f"**Xác minh danh tính hoàn tất !**\nMột lần nữa chào mừng bạn đến với cộng đồng Muốn Mở Mang, bạn có thể bắt đầu tại {welcomeChannel.mention} !")
+        else:
+            await member.send(f"**Xác minh danh tính thất bại do có lỗi xảy ra, vui lòng liên hệ đội ngũ kỹ thuật để báo lỗi và bắt họ fix bug nhé !**")
 
     # function for get the student id
     async def getVerifiedUserStudentID(self, member: discord.Member) -> str:
